@@ -11,6 +11,7 @@ bessy.join = 'bevel';
 
 
 bessy.compile = function(code){
+  code = code.split('\n');
   var lineNumber = 0;
   svgcode = '';
   for(lineNumber = 0;lineNumber<code.length;lineNumber++){
@@ -49,6 +50,18 @@ bessy.compile = function(code){
       }
       else if(command == 'circle'){
         svgcode += bessy.circle(args,lineNumber+1);
+      }
+      else if(command == 'ellipse'){
+        svgcode += bessy.ellipse(args,lineNumber+1);
+      }
+      else if(command == 'polygon'){
+        svgcode += bessy.polygon(args,lineNumber+1);
+      }
+      else if(command == 'polyline'){
+        svgcode += bessy.polyline(args,lineNumber+1);
+      }
+      else if(command == 'path'){
+        svgcode += bessy.path(args,lineNumber+1);
       }
       else {
 
@@ -95,7 +108,46 @@ bessy.circle = function(args,lineNumber){
     throw `line ${lineNumber}: invalid number of arguments for circle`;
   }
 }
+bessy.ellipse = function(args,lineNumber){
+  args = args.split(' ');
+  if(args.length==4){
+    return `\n<ellipse cx='${args[0]}' cy='${args[1]}' rx='${args[2]}' ry='${args[3]}' fill='${bessy.fill}' stroke='${bessy.stroke}' stroke-width='${bessy.strokewidth}' />`
+  }
+  else{
+    throw `line ${lineNumber}: invalid number of arguments for ellipse`;
+  }
+}
+bessy.polygon = function(args,lineNumber){
+  args = args.split(' ');
+  if(args.length>4 && args.length%2==0){
+    points = ''
+    for(i=0;i<args.length;i+=2){
+      points += ` ${args[i]},${args[i+1]}`
+    }
+    return `\n<polygon points='${points.slice(1)}' fill='${bessy.fill}' stroke='${bessy.stroke}' stroke-width='${bessy.strokewidth}' stroke-linejoin='${bessy.join}' />`
+  }
+  else{
+    throw `line ${lineNumber}: invalid number of arguments for polygon`;
+  }
+}
+bessy.polyline = function(args,lineNumber){
+  args = args.split(' ');
+  if(args.length>4 && args.length%2==0){
+    points = ''
+    for(i=0;i<args.length;i+=2){
+      points += ` ${args[i]},${args[i+1]}`
+    }
+    return `\n<polyline points='${points.slice(1)}' fill='${bessy.fill}' stroke='${bessy.stroke}' stroke-width='${bessy.strokewidth}' stroke-linejoin='${bessy.join}' stroke-linecap='${bessy.cap}'/>`
+  }
+  else{
+    throw `line ${lineNumber}: invalid number of arguments for polyline`;
+  }
+}
+
+bessy.path = function(args,lineNumber){
+  return `\n<path d='${args}' fill='${bessy.fill}' stroke='${bessy.stroke}' stroke-width='${bessy.strokewidth}' stroke-linejoin='${bessy.join}' stroke-linecap='${bessy.cap}' />`
+}
 
 fs.readFile(process.argv[2],'utf8',function(err,data){
-  console.log(bessy.compile(data.toLowerCase().split('\n')));
+  console.log(bessy.compile(data));
 });
